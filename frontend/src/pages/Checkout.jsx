@@ -19,11 +19,8 @@ const Checkout = () => {
   const deliveryFee = 50;
   const total = subtotal + deliveryFee;
 
-  /* ---------------- VALIDATION ---------------- */
-
   const isAddressValid = () => {
     const phoneRegex = /^[6-9]\d{9}$/;
-
     return (
       address.name.trim() &&
       phoneRegex.test(address.phone) &&
@@ -33,24 +30,19 @@ const Checkout = () => {
     );
   };
 
-  /* ---------------- PLACE ORDER ---------------- */
-
   const handlePlaceOrder = () => {
-     if (cart.length === 0) {
+    if (cart.length === 0) {
       alert("Add something in cart first, your cart seems empty 🛒");
       return;
-     }
-
+    }
     if (!isAddressValid()) {
       alert("Please fill all address details correctly");
       return;
     }
-
     if (!paymentMethod) {
       alert("Please select a payment method");
       return;
     }
-
     if (paymentMethod === "cod") {
       placeOrderToBackend("pending");
       alert("Order placed successfully 🎉");
@@ -60,124 +52,113 @@ const Checkout = () => {
   };
 
   const placeOrderToBackend = async (paymentStatus) => {
-  try {
-    const orderData = { 
+    try {
+      const orderData = {
+        items: cart.map((item) => ({
+          productId: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        address,
+        payment: {
+          method: paymentMethod,
+          status: paymentStatus,
+          transactionId: paymentMethod === "cod" ? null : "TXN" + Date.now(),
+        },
+        totalAmount: total,
+      };
+      await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+    } catch (err) {
+      console.error("Order save failed", err);
+    }
+  };
 
-      items: cart.map((item) => ({
-        productId: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
+  const inputClass = "w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-orange-500/60 focus:bg-white/8 transition-all duration-200 text-white placeholder-gray-600 text-sm";
+  const labelClass = "block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest";
 
-      address,
-
-      payment: {
-        method: paymentMethod,
-        status: paymentStatus,
-        transactionId:
-          paymentMethod === "cod"
-            ? null
-            : "TXN" + Date.now(),
-      },
-
-      totalAmount: total,
-    };
-
-    await fetch("http://localhost:5000/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
-    });
-  } catch (err) {
-    console.error("Order save failed", err);
-  }
- };
-
+  const paymentOptions = [
+    { id: "cod", emoji: "💵", label: "Cash on Delivery", sub: "Pay when you receive" },
+    { id: "gpay", emoji: "📱", label: "Google Pay", sub: "UPI payment" },
+    { id: "card", emoji: "💳", label: "Credit / Debit Card", sub: "Visa, Mastercard, etc." },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#0d0d0d] text-white">
       <Navbar />
 
-      {/* HERO HEADER */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 py-12 pt-24 md:pt-28 shadow-lg">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight drop-shadow-lg flex items-center gap-3">
-            <span className="text-6xl">✅</span>
+      {/* ===== HERO HEADER ===== */}
+      <div className="relative overflow-hidden pt-24 pb-14 md:pt-32 md:pb-16">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-[#0d0d0d]"></div>
+        <div className="absolute top-0 right-0 w-[400px] h-[300px] bg-green-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <span className="inline-block text-xs font-bold tracking-[0.25em] uppercase text-green-500 mb-4 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">
+            Almost There
+          </span>
+          <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-tight flex items-center gap-4">
             Checkout
+            <span className="text-5xl">✅</span>
           </h1>
-          <p className="text-green-50 mt-2 text-lg">
-            Complete your order - we're almost there!
-          </p>
+          <p className="text-gray-400 mt-2 text-base">Complete your order — we're almost there!</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* LEFT: ADDRESS FORM */}
+      <div className="max-w-7xl mx-auto px-6 pb-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {/* LEFT: ADDRESS + PAYMENT */}
         <div className="lg:col-span-2 space-y-6">
-          
-          {/* Address Section */}
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900 flex items-center gap-3">
-              <span className="text-orange-600">📍</span>
-              Delivery Address
+
+          {/* Address */}
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 md:p-9">
+            <span className="inline-block text-xs font-bold tracking-[0.25em] uppercase text-orange-500 mb-4 px-3 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+              Step 1
+            </span>
+            <h2 className="text-2xl font-black text-white mb-1 flex items-center gap-2">
+              <span>📍</span> Delivery Address
             </h2>
-            <p className="text-gray-500 mb-6">Where should we deliver your order?</p>
+            <p className="text-gray-500 text-sm mb-7">Where should we deliver your order?</p>
 
-            <div className="space-y-4">
-              <div className="relative">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
+            <div className="space-y-5">
+              <div>
+                <label className={labelClass}>Full Name <span className="text-red-500 normal-case">*</span></label>
                 <input
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 outline-none transition-all duration-300 text-gray-800"
+                  className={inputClass}
                   placeholder="Enter your full name"
-                  onChange={(e) =>
-                    setAddress({ ...address, name: e.target.value })
-                  }
+                  onChange={(e) => setAddress({ ...address, name: e.target.value })}
                 />
               </div>
-
-              <div className="relative">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 outline-none transition-all duration-300 text-gray-800"
-                  placeholder="10-digit mobile number"
-                  maxLength="10"
-                  onChange={(e) =>
-                    setAddress({ ...address, phone: e.target.value })
-                  }
-                />
+             <div>
+              <label className={labelClass}>Phone Number <span className="text-red-500 normal-case">*</span></label>
+               <div className="flex items-center bg-white/5 border border-white/10 rounded-xl focus-within:border-orange-500/60 focus-within:bg-white/8 transition-all duration-200 overflow-hidden">
+                <span className="px-4 py-3.5 text-sm font-bold text-orange-400 border-r border-white/10 bg-white/5 shrink-0">
+                 +91
+                </span>
+               <input
+                className="flex-1 px-4 py-3.5 bg-transparent focus:outline-none text-white placeholder-gray-600 text-sm"
+                placeholder="10-digit mobile number"
+                maxLength="10"
+                onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+               />
               </div>
-
-              <div className="relative">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Street Address <span className="text-red-500">*</span>
-                </label>
+              </div>
+              <div>
+                <label className={labelClass}>Street Address <span className="text-red-500 normal-case">*</span></label>
                 <input
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 outline-none transition-all duration-300 text-gray-800"
+                  className={inputClass}
                   placeholder="House no., Building name, Area"
-                  onChange={(e) =>
-                    setAddress({ ...address, street: e.target.value })
-                  }
+                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
                 />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    City <span className="text-red-500">*</span>
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className={labelClass}>City <span className="text-black-normal-case">*</span></label>
                   <select
-                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 outline-none transition-all duration-300 text-gray-800 bg-white"
-                    onChange={(e) =>
-                      setAddress({ ...address, city: e.target.value })
-                    }
+                    className={inputClass + "bg-[#111] [&>option]:bg-[#1a1a1a] [&>option]:text-white"}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
                   >
                     <option value="">Select City</option>
                     <option value="Mumbai">Mumbai</option>
@@ -187,159 +168,110 @@ const Checkout = () => {
                     <option value="Hyderabad">Hyderabad</option>
                   </select>
                 </div>
-
-                <div className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Pincode <span className="text-red-500">*</span>
-                  </label>
+                <div>
+                  <label className={labelClass}>Pincode <span className="text-red-500 normal-case">*</span></label>
                   <input
-                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 outline-none transition-all duration-300 text-gray-800"
+                    className={inputClass}
                     placeholder="6-digit pincode"
                     maxLength="6"
-                    onChange={(e) =>
-                      setAddress({ ...address, pincode: e.target.value })
-                    }
+                    onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Address Validation Status */}
             {isAddressValid() && (
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                <span className="text-2xl">✅</span>
-                <p className="text-green-700 font-semibold">Address details verified!</p>
+              <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3">
+                <span className="text-green-400 text-xl">✅</span>
+                <p className="text-green-400 font-semibold text-sm">Address details verified!</p>
               </div>
             )}
           </div>
 
-          {/* Payment Method Section */}
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900 flex items-center gap-3">
-              <span className="text-orange-600">💳</span>
-              Payment Method
+          {/* Payment Method */}
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 md:p-9">
+            <span className="inline-block text-xs font-bold tracking-[0.25em] uppercase text-orange-500 mb-4 px-3 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+              Step 2
+            </span>
+            <h2 className="text-2xl font-black text-white mb-1 flex items-center gap-2">
+              <span>💳</span> Payment Method
             </h2>
-            <p className="text-gray-500 mb-6">Choose your preferred payment option</p>
+            <p className="text-gray-500 text-sm mb-7">Choose your preferred payment option</p>
 
             <div className="space-y-3">
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                paymentMethod === "cod" 
-                  ? "border-orange-500 bg-orange-50" 
-                  : "border-gray-200 hover:border-orange-300 bg-white"
-              } ${!isAddressValid() ? "opacity-50 cursor-not-allowed" : ""}`}>
-                <input
-                  type="radio"
-                  name="payment"
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500"
-                  disabled={!isAddressValid()}
-                  onChange={() => setPaymentMethod("cod")}
-                />
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-3xl">💵</span>
-                  <div>
-                    <p className="font-semibold text-gray-800">Cash on Delivery</p>
-                    <p className="text-sm text-gray-500">Pay when you receive</p>
+              {paymentOptions.map((opt) => (
+                <label
+                  key={opt.id}
+                  className={`flex items-center gap-4 p-5 border rounded-2xl cursor-pointer transition-all duration-200 ${
+                    paymentMethod === opt.id
+                      ? "border-orange-500/50 bg-orange-500/10"
+                      : "border-white/10 bg-white/[0.02] hover:border-orange-500/25 hover:bg-white/5"
+                  } ${!isAddressValid() ? "opacity-40 cursor-not-allowed" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    className="w-4 h-4 accent-orange-500"
+                    disabled={!isAddressValid()}
+                    onChange={() => setPaymentMethod(opt.id)}
+                  />
+                  <span className="text-2xl">{opt.emoji}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-white text-sm">{opt.label}</p>
+                    <p className="text-xs text-gray-500">{opt.sub}</p>
                   </div>
-                </div>
-              </label>
-
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                paymentMethod === "gpay" 
-                  ? "border-orange-500 bg-orange-50" 
-                  : "border-gray-200 hover:border-orange-300 bg-white"
-              } ${!isAddressValid() ? "opacity-50 cursor-not-allowed" : ""}`}>
-                <input
-                  type="radio"
-                  name="payment"
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500"
-                  disabled={!isAddressValid()}
-                  onChange={() => setPaymentMethod("gpay")}
-                />
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-3xl">📱</span>
-                  <div>
-                    <p className="font-semibold text-gray-800">Google Pay</p>
-                    <p className="text-sm text-gray-500">UPI payment</p>
-                  </div>
-                </div>
-              </label>
-
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                paymentMethod === "card" 
-                  ? "border-orange-500 bg-orange-50" 
-                  : "border-gray-200 hover:border-orange-300 bg-white"
-              } ${!isAddressValid() ? "opacity-50 cursor-not-allowed" : ""}`}>
-                <input
-                  type="radio"
-                  name="payment"
-                  className="w-5 h-5 text-orange-600 focus:ring-orange-500"
-                  disabled={!isAddressValid()}
-                  onChange={() => setPaymentMethod("card")}
-                />
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-3xl">💳</span>
-                  <div>
-                    <p className="font-semibold text-gray-800">Credit / Debit Card</p>
-                    <p className="text-sm text-gray-500">Visa, Mastercard, etc.</p>
-                  </div>
-                </div>
-              </label>
+                  {paymentMethod === opt.id && (
+                    <span className="text-orange-400 text-lg">✓</span>
+                  )}
+                </label>
+              ))}
             </div>
 
             {!isAddressValid() && (
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                <p className="text-yellow-800 text-sm font-medium">Please complete the delivery address first</p>
+              <div className="mt-5 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center gap-3">
+                <span className="text-yellow-400 text-xl">⚠️</span>
+                <p className="text-yellow-400 text-sm font-medium">Please complete the delivery address first</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT: ORDER SUMMARY - Sticky */}
+        {/* RIGHT: ORDER SUMMARY */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 sticky top-28">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
-              <span className="text-orange-600">📋</span>
-              Order Summary
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 sticky top-28">
+            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+              <span className="text-orange-400">📋</span> Order Summary
             </h2>
 
             {/* Cart Items */}
-            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+            <div className="space-y-2.5 mb-6 max-h-56 overflow-y-auto pr-1 scrollbar-hide">
               {cart.map((item) => (
-                <div key={item._id} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800 text-sm">{item.name}</p>
-                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                <div key={item._id} className="flex justify-between items-start p-3 bg-white/5 border border-white/8 rounded-xl">
+                  <div className="flex-1 pr-2">
+                    <p className="font-semibold text-white text-xs leading-snug">{item.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-bold text-gray-800">₹{item.price * item.quantity}</span>
+                  <span className="font-bold text-orange-400 text-sm shrink-0">₹{item.price * item.quantity}</span>
                 </div>
               ))}
             </div>
 
-            <div className="border-t-2 border-dashed border-gray-300 pt-4 mb-4"></div>
+            <div className="border-t border-dashed border-white/10 mb-5"></div>
 
             {/* Price Breakdown */}
             <div className="space-y-3 mb-6">
-              <div className="flex justify-between items-center text-gray-700">
-                <span className="flex items-center gap-2">
-                  <span>🍽️</span>
-                  Item Total
-                </span>
-                <span className="font-semibold">₹{subtotal}</span>
+              <div className="flex justify-between items-center text-gray-400 text-sm">
+                <span className="flex items-center gap-2"><span>🍽️</span> Item Total</span>
+                <span className="font-semibold text-white">₹{subtotal}</span>
               </div>
-              
-              <div className="flex justify-between items-center text-gray-700">
-                <span className="flex items-center gap-2">
-                  <span>🚚</span>
-                  Delivery Fee
-                </span>
-                <span className="font-semibold">₹{deliveryFee}</span>
+              <div className="flex justify-between items-center text-gray-400 text-sm">
+                <span className="flex items-center gap-2"><span>🚚</span> Delivery Fee</span>
+                <span className="font-semibold text-white">₹{deliveryFee}</span>
               </div>
-              
-              <div className="border-t-2 border-dashed border-gray-300 pt-3 mt-3">
+              <div className="border-t border-dashed border-white/10 pt-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold text-gray-900">Total Amount</span>
-                  <span className="text-3xl font-bold text-orange-600">₹{total}</span>
+                  <span className="text-base font-bold text-white">Total Amount</span>
+                  <span className="text-3xl font-black text-orange-400">₹{total}</span>
                 </div>
               </div>
             </div>
@@ -347,27 +279,25 @@ const Checkout = () => {
             {/* Place Order Button */}
             <button
               onClick={handlePlaceOrder}
-              className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-lg rounded-full hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-black text-base rounded-xl hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
               disabled={!isAddressValid() || !paymentMethod}
             >
               {!isAddressValid() ? "Complete Address" : !paymentMethod ? "Select Payment" : "Place Order 🎉"}
             </button>
 
             {/* Trust Badges */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-3 gap-2 text-center text-xs text-gray-600">
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl mb-1">🔒</span>
-                  <span className="font-medium">Secure</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl mb-1">⚡</span>
-                  <span className="font-medium">Fast</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl mb-1">✅</span>
-                  <span className="font-medium">Safe</span>
-                </div>
+            <div className="mt-6 pt-5 border-t border-white/5">
+              <div className="grid grid-cols-3 gap-2 text-center text-xs text-gray-500">
+                {[
+                  { icon: "🔒", label: "Secure" },
+                  { icon: "⚡", label: "Fast" },
+                  { icon: "✅", label: "Safe" },
+                ].map((b, i) => (
+                  <div key={i} className="flex flex-col items-center bg-white/5 rounded-xl py-3 border border-white/8">
+                    <span className="text-xl mb-1">{b.icon}</span>
+                    <span className="font-medium text-gray-400">{b.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

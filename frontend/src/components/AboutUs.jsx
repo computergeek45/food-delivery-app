@@ -1,56 +1,57 @@
 const AboutUs = () => {
   return (
-    <section className="bg-white py-20">
+    <section className="bg-[#111111] py-24 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
 
           {/* LEFT IMAGE */}
-          <div className="w-full h-64 md:h-80 overflow-hidden rounded-2xl shadow-xl group">
-            <img 
-             src="./aboutus.png" 
-             alt="Delicious Food" 
-             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+          <div className="w-full h-72 md:h-96 overflow-hidden rounded-3xl shadow-2xl group relative">
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-transparent z-10 rounded-3xl pointer-events-none"></div>
+            <img
+              src="./aboutus.png"
+              alt="About Us"
+              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
             />
           </div>
 
           {/* RIGHT CONTENT */}
-          <div className="space-y-6">
+          <div className="space-y-7">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-3 text-gray-900 tracking-tight">
-                About Us
+              <span className="inline-block text-xs font-bold tracking-[0.25em] uppercase text-orange-500 mb-4 px-3 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+                Our Story
+              </span>
+              <h2 className="text-5xl md:text-6xl font-black mb-3 text-white tracking-tight leading-tight">
+                About <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Us</span>
               </h2>
-
-              <p className="text-lg md:text-xl text-orange-600 font-medium italic mb-8 flex items-center gap-2">
-                <span className="text-2xl">✨</span>
-                Crafted with passion, Served with love
-                <span className="text-2xl">✨</span>
+              <p className="text-base text-orange-400 font-semibold italic flex items-center gap-2 mt-3">
+                <span>✨</span> Crafted with passion, Served with love <span>✨</span>
               </p>
             </div>
 
-            <div className="relative pl-6 border-l-4 border-orange-500">
-              <p className="text-gray-700 leading-relaxed text-lg">
-                At our core, we believe great food brings people together. 
-                Our journey started with a simple idea — to make delicious, high-quality meals easily accessible to everyone. 
-                From carefully selecting fresh ingredients to preparing every dish with attention and care, we focus on taste, quality, and consistency. 
-                Whether you're craving comfort food or exploring new flavors, we're here to serve meals that feel familiar, satisfying, and made just for you. 
+            <div className="relative pl-6 border-l-2 border-orange-500/50">
+              <p className="text-gray-400 leading-relaxed text-base">
+                At our core, we believe great food brings people together.
+                Our journey started with a simple idea — to make delicious, high-quality meals easily accessible to everyone.
+                From carefully selecting fresh ingredients to preparing every dish with attention and care, we focus on taste, quality, and consistency.
+                Whether you're craving comfort food or exploring new flavors, we're here to serve meals that feel familiar, satisfying, and made just for you.
                 Your happiness is our biggest ingredient, and every order is prepared with the same passion we'd serve to our own family.
               </p>
             </div>
 
-            {/* Optional Stats or CTA */}
-            <div className="pt-6 flex gap-6">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-orange-600">500+</p>
-                <p className="text-sm text-gray-600">Happy Customers</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-orange-600">50+</p>
-                <p className="text-sm text-gray-600">Delicious Dishes</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-orange-600">100%</p>
-                <p className="text-sm text-gray-600">Fresh Ingredients</p>
-              </div>
+            {/* Stats */}
+            <div className="pt-4 flex gap-8">
+              {[
+                { value: "500+", label: "Happy Customers" },
+                { value: "50+", label: "Delicious Dishes" },
+                { value: "100%", label: "Fresh Ingredients" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center group">
+                  <p className="text-3xl font-black text-orange-400 group-hover:scale-110 transition-transform duration-200 inline-block">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
