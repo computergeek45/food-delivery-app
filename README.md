@@ -76,6 +76,8 @@ Run backend:
 
 ```bash
 npm start
+or
+node server.js
 ```
 
 ---
